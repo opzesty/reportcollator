@@ -15,7 +15,8 @@ def generate_form():
 
 @app.route('/')
 def main():
-    return render_template("page_template.html")
+    my_obj = { "header" : "Welcome!!!" }
+    return render_template("page_template.html", data = my_obj)
 
 if __name__ == '__main__':
     app.run()
