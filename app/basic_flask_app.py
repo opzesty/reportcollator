@@ -9,7 +9,6 @@ def generate_form():
     am_pm = request.form['am_pm']
     report_type = request.form['report_type']
     filenames = ""
-    print(len(request.files))
     for uploaded_file in request.files.getlist("files"):
         filenames += uploaded_file.filename + " "
     return "{} - {} - {} - {}".format(unit_name, am_pm, report_type, filenames)
