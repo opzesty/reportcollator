@@ -102,7 +102,7 @@ def pull_supp_info(supp_file):
     
 def pull_eqp_info(equip_file):
     # Open the second Excel sheet using xlrd
-    equip_workbook = xlrd.open_workbook(file_contents=equip_file.read())
+    equip_workbook = xlrd.open_workbook(file_contents=equip_file.stream.read())
     equip_sheet = equip_workbook.sheet_by_index(0)
 
     # Initialize an empty list to store the matched values

@@ -34,12 +34,14 @@ def generate_form():
         'output_filename': output_name
     }
     
+    files = {}
     # Add the file data to the payload
-    payload['supp_file'] = (file_1.filename, file_1.stream, file_1.content_type)
-    payload['equip_file'] = (file_2.filename, file_2.stream, file_2.content_type)
+    files['supp_file'] = file_1
+    files['equip_file'] = file_2
 
+    print(payload)
     # Send a POST request to the API
-    response = requests.post(API_URL, data=payload, headers={'Content-Type': 'multipart/form-data'})
+    response = requests.post(API_URL, data=payload, files=files)
     
     if response.status_code == 200:
         return response.json()['save_path']
