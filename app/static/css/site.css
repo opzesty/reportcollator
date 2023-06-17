@@ -1,0 +1,26 @@
+.row {
+  padding-bottom: 1em;
+}
+
+.file-upload { 
+  opacity: 0;
+  height: 100%;
+  z-index:100;
+}
+.file-upload-box { 
+  height: 25vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+.file-upload-box:hover {
+  background-color: #eee;
+}
+.file-upload-help {
+  display: flex;
+  position: absolute;
+  z-index: 0;
+  opacity: 60%
+}
