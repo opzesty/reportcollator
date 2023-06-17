@@ -1,0 +1,25 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <form method="post" action="/generate_form">
+      <div class="data">
+        <input type="text" name="unit_name" placeholder="Unit Name">
+        <select name="am_pm" id="cars">
+          <option value="am">AM</option>
+          <option value="pm">PM</option>
+        </select>
+        <select name="report_type" id="cars">
+          <option value="logstat">LOGSTAT</option>
+          <option value="perstat">PERSTAT</option>
+        </select>
+      </div>
+      <div class="files">
+        <input type="file" name="files" multiple />
+      </div>
+      <div class="submit">
+        <input type="submit">
+      </div>
+    </form>
+  </body>
+</html>
