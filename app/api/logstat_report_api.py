@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from openpyxl import Workbook
 from openpyxl.styles import Font
 import xlrd
 import sys
 import os
+import io
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -24,16 +25,19 @@ def generate_logstat():
     supp_information = pull_supp_info(supp_file)
     equip_information = pull_eqp_info(equip_file)
     workbook = populate_report(workbook, supp_information, equip_information, unit)
-    save_path = save_workbook(workbook, save_path)
 
     # Prepare the response
-    response = {
-        'status': 'success',
-        'message': 'Report generated successfully.',
-        'report': save_path
+    output = io.BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    # Prepare the response headers
+    headers = {
+        'Content-Disposition': f'attachment; filename="{output_filename}"',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     }
 
-    return jsonify(response)
+    return Response(output, headers=headers)
 
 def get_save_path(filename):
     current_directory = os.getcwd()

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from api.logstat_report_api import api_blueprint
 import requests
 import os
+import shutil
+import io
 
 app = Flask(__name__)
 
@@ -41,12 +43,21 @@ def generate_form():
     files['supp_file'] = file_1
     files['equip_file'] = file_2
 
-    print(payload)
     # Send a POST request to the API
     response = requests.post(API_URL, data=payload, files=files)
     
     if response.status_code == 200:
-        return response.json()['save_path']
+        # Create an in-memory file buffer
+        file_buffer = io.BytesIO(response.content)
+
+        # Set the appropriate headers for the file download
+        headers = {
+            'Content-Disposition': f'attachment; filename="{output_name}"',
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+
+        # Create a Flask Response object with the file buffer and headers
+        return Response(file_buffer, headers=headers)
     else:
         return "Failed to generate the report."
 
