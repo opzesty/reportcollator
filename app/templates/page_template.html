@@ -1,26 +1,57 @@
 <html>
   <head>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-grid.min.css') }}" />
+
+    <style>
+      .row {
+        padding-bottom: 1em;
+      }
+    </style>
   </head>
   <body>
-    <h1>{{ data.header }}</h1>
-    <form method="post" action="/generate_form" enctype="multipart/form-data">
-      <div class="data">
-        <input type="text" name="unit_name" placeholder="Unit Name">
-        <select name="am_pm" id="cars">
-          <option value="am">AM</option>
-          <option value="pm">PM</option>
-        </select>
-        <select name="report_type" id="cars">
-          <option value="logstat">LOGSTAT</option>
-          <option value="perstat">PERSTAT</option>
-        </select>
-      </div>
-      <div class="files">
-        <input type="file" name="files" multiple />
-      </div>
-      <div class="submit">
-        <input type="submit">
-      </div>
-    </form>
+    <div class="container">
+      <div class="row"><h1>{{ data.header }}</h1></div>
+      <form id="form-id" method="post" action="/generate_form" enctype="multipart/form-data">
+        <div class="row data">
+          <div class="col-sm-4">
+            <input class="form-control" type="text" name="unit_name" placeholder="Unit Name">
+	  </div>
+          <div class="col-sm-4">
+	    <select class="form-control" name="am_pm" id="cars">
+              <option value="am">AM</option>
+              <option value="pm">PM</option>
+            </select>
+	  </div>
+          <div class="col-sm-4">
+	    <select class="form-control" name="report_type" id="cars">
+              <option value="logstat">LOGSTAT</option>
+              <option value="perstat">PERSTAT</option>
+            </select>
+          </div>
+        </div>
+        <div class="row files">
+          <div class="col-sm-12">
+            <input class="form-control" type="file" name="files" multiple />
+	  </div>
+        </div>
+        <div class="row submit">
+	  <div>
+            <input id="submit-btn" class="form-control btn btn-primary" type="button" value="submit" >
+	  </div>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", function () {
+        var form = document.getElementById("form-id");
+        
+        document.getElementById("submit-btn").addEventListener("click", function () {
+          form.submit();
+        });
+      });
+    </script>
   </body>
 </html>
