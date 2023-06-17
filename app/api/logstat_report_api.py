@@ -30,7 +30,7 @@ def generate_logstat():
     response = {
         'status': 'success',
         'message': 'Report generated successfully.',
-        'save_path': save_path
+        'report': save_path
     }
 
     return jsonify(response)
@@ -116,8 +116,6 @@ def pull_eqp_info(equip_file):
 
         # Append the matched values as a tuple to the list
         matched_values.append((column_e_value, column_f_value, column_g_value))
-        
-    print(matched_values)
 
     return matched_values
 

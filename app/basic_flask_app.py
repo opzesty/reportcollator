@@ -21,10 +21,12 @@ def generate_form():
     file_2 = ""
     output_name = "logstat-{}-day{}-{}.xlsx".format(unit_name,day,am_pm)
     for uploaded_file in request.files.getlist("files"):
-        if "EQPT" in uploaded_file.filename:
+        if any(keyword in uploaded_file.filename for keyword in ["EQUIP", "EQPT"]):
+            print("file_2 is : {}".format(uploaded_file.filename))
             file_2 = uploaded_file
-        elif "SUPP" in uploaded_file.filename:
+        elif any(keyword in uploaded_file.filename for keyword in ["SUPP", "SUP"]):
             file_1 = uploaded_file
+            print("file_1 is : {}".format(uploaded_file.filename))
         else:
             return "{} not a valid file".format(uploaded_file.filename)
             
@@ -54,4 +56,4 @@ def main():
     return render_template("page_template.html", data = my_obj)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
