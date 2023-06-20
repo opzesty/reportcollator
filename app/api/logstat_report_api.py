@@ -44,9 +44,6 @@ def get_save_path(filename):
     save_path = os.path.join(current_directory, filename)
     return save_path
     
-def identify_unit():
-    return sys.argv[1]
-    
 def check_and_add_unit(sheet, search_unit):
     column_a = sheet["A"]
 
