@@ -54,6 +54,16 @@
 
 	document.getElementById("file-selector").addEventListener("change", function (e) {
           var file_count = e.srcElement.files.length;
+		  var fileName = e.srcElement.files[0].name;
+		  var unitNameInput = document.querySelector("input[name='unit_name']");
+		
+		  var numbersRegex = /^\d+/; // Regular expression to match numbers at the beginning of the string
+		  var numbersMatch = fileName.match(numbersRegex);
+		  var extractedNumbers = numbersMatch ? numbersMatch[0] : ""; // Extracted numbers as a string
+		
+		  unitNameInput.value = extractedNumbers; // Update the value of the input field with extracted numbers
+		
+		  document.querySelector(".form-control").innerHTML = "-- Excellent! " + file_count + " files have been added! --";
           document.querySelector(".file-upload-help").innerHTML = "-- Excellent!  " + file_count + " files have been added! --"
 	});
       });
