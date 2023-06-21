@@ -1,13 +1,14 @@
 from flask import Blueprint, request, jsonify, Response
 from openpyxl import Workbook
-from openpyxl.styles import Font
+from openpyxl.styles import Font, Border, Side
+from openpyxl.utils import get_column_letter
 import xlrd
 import sys
 import os
 import io
 from datetime import date
 
-api_blueprint = Blueprint('api', __name__)
+api_blueprint = Blueprint('papi', __name__)
 
 @api_blueprint.route('/generate-perstat', methods=['POST'])
 def generate_perstat():
@@ -21,12 +22,13 @@ def generate_perstat():
     time = set_time(am_pm)
     date = set_date()
     zulutime = combine_datetime(time, date)
+    location = "Fort McCoy, Wisconsin"
     save_path = get_save_path(output_filename)
     workbook = initialize_workbook()
+    workbook = create_headers(workbook)
+    perstat_info = pull_perstat_info(perstat_file)
+    workbook = populate_report(workbook, perstat_info, unit, zulutime, location)
     workbook = format_report(workbook)
-    #perstat_info = pull_perstat_info(perstat_file)
-    perstat_info = "test"
-    workbook = populate_report(workbook, perstat_info, unit)
 
     # Prepare the response
     output = io.BytesIO()
@@ -91,19 +93,29 @@ def save_workbook(workbook, save_path):
     return(save_path)
     
 def pull_perstat_info(perstat_file):
-    raise NotImplementedError("Function not yet implemented")
+    perstat_workbook = xlrd.open_workbook(file_contents=perstat_file.read())
+    perstat_sheet = perstat_workbook.sheet_by_index(0)  # Assuming it's the first sheet
 
-def format_report(workbook):
+    data = {}
+
+    # Iterate over the rows, starting from the second row (index 1)
+    for row in range(1, perstat_sheet.nrows):
+        rank = perstat_sheet.cell_value(row,1)
+        data[rank] = (perstat_sheet.cell_value(row,3), perstat_sheet.cell_value(row,4), perstat_sheet.cell_value(row,5))
+    
+    return data
+
+def create_headers(workbook):
     # Headers for perstat report
     headers = [
     "Date/Time (DD01300ZJUN23)",
     "LOCATION",
     "UNIT",
-    "AUTHORIZED/RANK",
-    "ASSIGNED/RANK",
+    "GRADE",
+    "RANK`",
     "BRANCH/MOS",
     "ON HAND",
-    "GAINS",
+    "AUTHORIZED",
     "REPLACEMENTS",
     "RETURNED TO DUTY",
     "KILLED",
@@ -129,6 +141,80 @@ def format_report(workbook):
 
     return workbook
 
-def populate_report(workbook, data, unit):
-    # not yet implemented 
+def populate_report(workbook, data, unit, zulutime, location):
+    sheet = workbook.active
+    row = 2
+    
+    rank_dict = {
+        "E1": "PVT",
+        "E2": "PV2",
+        "E3": "PFC",
+        "E4": "SPC",
+        "E5": "SGT",
+        "E6": "SSG",
+        "E7": "SFC",
+        "E8": "MSG",
+        "E9": "SGM",
+        "O1": "2LT",
+        "O2": "1LT",
+        "O3": "CPT",
+        "O4": "MAJ",
+        "O5": "LTC",
+        "O6": "COL",
+        "O7": "BG",
+        "O8": "MG",
+        "O9": "LTG",
+        "O10": "GEN"
+    }
+    
+    for rank in data.keys():
+        # Set date time group
+        cell = sheet.cell(row=row, column = 1)
+        cell.value = zulutime
+        # Set location
+        cell = sheet.cell(row=row, column = 2)
+        cell.value = location
+        # Set unit
+        cell = sheet.cell(row=row, column = 3)
+        cell.value = unit
+        # Set Rank (number form)
+        cell = sheet.cell(row=row, column = 4)
+        cell.value = rank
+        # Set Rank (common parlance)
+        cell = sheet.cell(row=row, column = 5)
+        cell.value = rank_dict[rank]
+        # Set Branch
+        cell = sheet.cell(row=row, column = 6)
+        cell.value = data[rank][0]
+        # Set On Hand
+        cell = sheet.cell(row=row, column = 7)
+        cell.value = data[rank][1]
+        # Set Authorized
+        cell = sheet.cell(row=row, column = 8)
+        cell.value = data[rank][2]
+        row+=1
+        
+                
+    return workbook
+    
+def format_report(workbook):
+    # Assume active sheet
+    sheet = workbook.active
+    
+    # Create border style
+    border = Border(left=Side(style='thin'),
+                    right=Side(style='thin'),
+                    top=Side(style='thin'),
+                    bottom=Side(style='thin'))
+    
+    # Iterate over all cells in the sheet
+    for row in sheet.iter_rows():
+        for cell in row:
+            # Apply border style to each cell
+            cell.border = border
+            
+            # Autosize the column to fit the text
+            column_letter = get_column_letter(cell.column)
+            sheet.column_dimensions[column_letter].auto_size = True
+            
     return workbook

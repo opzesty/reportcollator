@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask, render_template, request, Response
-from api.logstat_report_api import api_blueprint
-from api.perstat_report_api import api_blueprint
+from api.logstat_report_api import api_blueprint as logstat_blueprint
+from api.perstat_report_api import api_blueprint as perstat_blueprint
 import requests
 import os
 import shutil
@@ -9,9 +9,8 @@ import io
 
 app = Flask(__name__)
 
-app.register_blueprint(api_blueprint, url_prefix='/api')
-
-API_URL = ''
+app.register_blueprint(logstat_blueprint, url_prefix='/api')
+app.register_blueprint(perstat_blueprint, url_prefix='/papi')
 
 
 @app.route('/generate_form', methods=["POST"])
@@ -26,7 +25,7 @@ def generate_form():
  
     files = {} 
     if report_type == "logstat":
-        output_name = "perstat-{}-day{}-{}.xlsx".format(unit_name,day,am_pm)
+        output_name = "logstat-{}-day{}-{}.xlsx".format(unit_name,day,am_pm)
         API_URL = 'http://localhost:5000/api/generate-logstat'  # Replace with your API URL
         for uploaded_file in request.files.getlist("files"):
             if any(keyword in uploaded_file.filename for keyword in ["EQUIP", "EQPT"]):
@@ -42,7 +41,7 @@ def generate_form():
         files['equip_file'] = file_2
     else:
         output_name = "perstat-{}-day{}-{}.xlsx".format(unit_name,day,am_pm)
-        API_URL = 'http://localhost:5000/api/generate-perstat'  # Replace with your API URL
+        API_URL = 'http://localhost:5000/papi/generate-perstat'  # Replace with your API URL
         files['perstat_file'] = next(iter(request.files.values()))
 
     # Prepare the payload for the API request

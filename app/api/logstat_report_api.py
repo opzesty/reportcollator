@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify, Response
 from openpyxl import Workbook
-from openpyxl.styles import Font
+from openpyxl.styles import Font, Border, Side
+from openpyxl.utils import get_column_letter
 import xlrd
 import sys
 import os
 import io
+from datetime import date
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -13,18 +15,21 @@ def generate_logstat():
     # Get the request data
     unit = request.form['unit']
     output_filename = request.form['output_filename']
+    am_pm = request.form['am_pm']
     supp_file = request.files['supp_file']
     equip_file = request.files['equip_file']
+    print(request.form)
 
     # Perform the report generation logic
-    time = set_time()
+    time = set_time(am_pm)
     date = set_date()
     save_path = get_save_path(output_filename)
     workbook = initialize_workbook()
-    workbook = format_report(workbook)
+    workbook = initial_population(workbook, date, time)
     supp_information = pull_supp_info(supp_file)
     equip_information = pull_eqp_info(equip_file)
     workbook = populate_report(workbook, supp_information, equip_information, unit)
+    workbook = format_report(workbook)
 
     # Prepare the response
     output = io.BytesIO()
@@ -58,11 +63,24 @@ def check_and_add_unit(sheet, search_unit):
 
     return new_row
     
-def set_time():
-    return "0800"
+def set_time(am_pm):
+    if am_pm == "am":
+        return "0700"
+    elif am_pm == "pm":
+        return "1300"
+    else:
+        raise ValueError("Invalid value for am_pm. Expected 'am' or 'pm'.")
     
 def set_date():
-    return "06/15/2023"
+    current_date = date.today()
+    return current_date
+    
+def combine_datetime(time, current_date):
+    formatted_date = current_date.strftime("%d").upper()
+    formatted_time = time[:2] + time[2:]
+    formatted_month_year = current_date.strftime("%b%y").upper()
+    combined_datetime = f"{formatted_date}{formatted_time}Z{formatted_month_year}"
+    return combined_datetime
 
 def initialize_workbook():
     # Create a new workbook
@@ -121,7 +139,7 @@ def pull_eqp_info(equip_file):
     return matched_values
 
 
-def format_report(workbook):
+def initial_population(workbook, date, time):
     # Remove the default first sheet
     default_sheet = workbook.active
     workbook.remove(default_sheet)
@@ -135,6 +153,12 @@ def format_report(workbook):
         unit_cell = sheet.cell(row=1, column=1)
         unit_cell.value = "UNIT"
         unit_cell.font = Font(bold=True, underline="single")
+        
+        if sheet_num == 0:
+            date_cell = sheet.cell(row=1, column=2)
+            time_cell = sheet.cell(row=1, column=3)
+            date_cell.value = date
+            time_cell.value = time
 
     return workbook
     
@@ -232,4 +256,29 @@ def populate_report(workbook, data, equip, unit):
         if sheet_num != 0:
             update_headers_and_values(sheet, report, this_unit)
             
+    return workbook
+    
+        
+def format_report(workbook):
+    # Iterate over 11 sheets
+    for sheet_num in range(0, 11):
+        sheet_name = workbook.sheetnames[sheet_num]
+        sheet = workbook[sheet_name]
+        
+        # Create border style
+        border = Border(left=Side(style='thin'),
+                        right=Side(style='thin'),
+                        top=Side(style='thin'),
+                        bottom=Side(style='thin'))
+        
+        # Iterate over all cells in the sheet
+        for row in sheet.iter_rows():
+            for cell in row:
+                # Apply border style to each cell
+                cell.border = border
+                
+                # Autosize the column to fit the text
+                column_letter = get_column_letter(cell.column)
+                sheet.column_dimensions[column_letter].auto_size = True
+                
     return workbook
