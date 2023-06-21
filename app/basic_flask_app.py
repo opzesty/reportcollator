@@ -71,7 +71,7 @@ def generate_form():
 
 @app.route('/')
 def main():
-    my_obj = { "header" : "Welcome!!!" }
+    my_obj = { "header" : "87th Training Division Report Generator" }
     return render_template("page_template.html", data = my_obj)
 
 if __name__ == '__main__':

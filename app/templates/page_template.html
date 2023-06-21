@@ -7,7 +7,14 @@
   </head>
   <body>
     <div class="container">
-      <div class="row"><h1>{{ data.header }}</h1></div>
+        <div class="row align-items-center">
+			 <div class="col-auto">
+				<img src="{{ url_for('static', filename='images/golden-acorn.png') }}" alt="87th Trainig Division">
+			</div>
+			<div class="col">
+				<h1>{{ data.header }}</h1>
+			</div>
+		</div>
       <form id="form-id" method="post" action="/generate_form" enctype="multipart/form-data">
         <div class="row data">
           <div class="col-sm-4">
