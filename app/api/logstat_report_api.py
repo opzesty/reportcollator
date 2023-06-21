@@ -25,10 +25,10 @@ def generate_logstat():
     date = set_date()
     save_path = get_save_path(output_filename)
     workbook = initialize_workbook()
-    workbook = initial_population(workbook, date, time)
+    workbook = initial_population(workbook)
     supp_information = pull_supp_info(supp_file)
     equip_information = pull_eqp_info(equip_file)
-    workbook = populate_report(workbook, supp_information, equip_information, unit)
+    workbook = populate_report(workbook, supp_information, equip_information, unit, date.strftime('%Y-%m-%d'), time)
     workbook = format_report(workbook)
 
     # Prepare the response
@@ -139,7 +139,7 @@ def pull_eqp_info(equip_file):
     return matched_values
 
 
-def initial_population(workbook, date, time):
+def initial_population(workbook):
     # Remove the default first sheet
     default_sheet = workbook.active
     workbook.remove(default_sheet)
@@ -153,12 +153,6 @@ def initial_population(workbook, date, time):
         unit_cell = sheet.cell(row=1, column=1)
         unit_cell.value = "UNIT"
         unit_cell.font = Font(bold=True, underline="single")
-        
-        if sheet_num == 0:
-            date_cell = sheet.cell(row=1, column=2)
-            time_cell = sheet.cell(row=1, column=3)
-            date_cell.value = date
-            time_cell.value = time
 
     return workbook
     
@@ -189,7 +183,7 @@ def update_headers_and_values(sheet, report, this_unit):
         cell = sheet.cell(row=this_unit, column=col_num)
         cell.value = report_line.format(column_f_value=OH, column_g_value=AUTH)
 
-def populate_report(workbook, data, equip, unit):
+def populate_report(workbook, data, equip, unit, date, time):
     # Iterate over 11 sheets
     for sheet_num in range(0, 11):
         sheet_name = workbook.sheetnames[sheet_num]
@@ -208,6 +202,11 @@ def populate_report(workbook, data, equip, unit):
                 
                 cell = sheet.cell(row=this_unit,column=col_num)
                 cell.value = item[1]
+
+                date_cell = sheet.cell(row=2, column=2)
+                time_cell = sheet.cell(row=2, column=3)
+                date_cell.value = date
+                time_cell.value = time
                 col_num += 1
         elif sheet_num == 1:
             report = data.get("CLASS_I", [])
